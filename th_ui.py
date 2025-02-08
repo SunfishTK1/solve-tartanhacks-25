@@ -85,7 +85,7 @@ if industry:
     st.markdown("<h2>Select Analysis Topics:</h2>", unsafe_allow_html=True)
     cols = st.columns(2)
     for i, prompt in enumerate(promptOptions):
-        col = cols[i % 2]
+        col = cols[i % 2] 
         if col.checkbox(prompt, key=f"checkbox_{i}"):
             selectedPrompts.append(prompt)
     st.markdown('</div>', unsafe_allow_html=True)
@@ -156,10 +156,28 @@ if submit_clicked:
         # Dynamic loading message with rotating phrases.
         loading_placeholder = st.empty()
         loading_phrases = [
-            "Analyzing company data...",
-            "Crunching numbers...",
-            "Gathering insights...",
-            "Almost done..."
+            "Initializing deep research on ...",
+            "Establishing secure connections to financial and market data sources...",
+            "Deploying AI-driven data crawlers to scan corporate filings, news, and investor reports...",
+            
+            "Aggregating historical financial performance metrics...",
+            "Extracting key market signals from regulatory filings and press releases...",
+            "Compiling competitive landscape insights...",
+            "Identifying strategic partnerships, mergers, and acquisitions...",
+            
+            "Applying machine learning models to detect revenue growth trends...",
+            "Performing sentiment analysis on recent corporate communications...",
+            "Benchmarking against industry competitors using multi-variable regression...",
+            "Assessing financial risk factors and liquidity analysis...",
+            
+            "Mapping out competitive advantages and vulnerabilities...",
+            "Detecting shifts in market sentiment through NLP-driven analysis...",
+            "Comparing key performance indicators against industry benchmarks...",
+            
+            "Synthesizing findings into an executive summary...",
+            "Highlighting red flags and strategic opportunities...",
+            "Generating final recommendations for market positioning...",
+            "Packaging intelligence report for decision-making..."
         ]
         i = 0
         while thread.is_alive():

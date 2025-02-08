@@ -5,7 +5,7 @@ import json
 from botocore.exceptions import ClientError
 from dotenv import load_dotenv
 import os
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 
 import logging
 import time
@@ -15,10 +15,71 @@ client = boto3.client("bedrock-runtime", region_name="us-east-1")
 load_dotenv()
 
 serp_api_key = os.getenv("SERP_API_KEY")
+open_page_rank_api_key = os.getenv("OPEN_PAGE_RANK_API_KEY")
 
 MAX_SCRAPE_CHARS = 20000
 MAX_RETRIES = 1          # Maximum number of retries per page.
 RETRY_DELAY = 0.1          # Seconds to wait between retries.
+
+def merge_dict_lists(list1, list2, shared_key):
+    # Create a dictionary from list2 for faster lookup
+    lookup_dict = {d[shared_key]: d for d in list2}
+    
+    # Create the merged list
+    merged_list = []
+    
+    # Iterate through list1 and merge with matching items from list2
+    for item1 in list1:
+        merged_dict = item1.copy()  # Create a copy of the first dictionary
+        
+        # If there's a matching item in list2, update the merged dictionary
+        if item1[shared_key] in lookup_dict:
+            merged_dict.update(lookup_dict[item1[shared_key]])
+            
+        merged_list.append(merged_dict)
+    
+    return merged_list
+
+def trim_www(domain):
+    return domain.replace('www.', '')
+
+def fetch_analytics_data(links):
+    domains = [trim_www(urlparse(link).netloc) for link in links]
+    domains_param = "&".join([f"domains[]={domain}" for domain in domains])
+    url = f"https://openpagerank.com/api/v1.0/getPageRank?{domains_param}"
+    headers = {"API-OPR": open_page_rank_api_key}
+
+    response = requests.get(url, headers=headers)
+
+    analytics_data = []
+    
+    if response.status_code == 200:
+        data = response.json()
+        if "response" in data and data["response"]:
+            analytics_data = data["response"]
+        else:
+            return {"error": "Invalid response structure"}
+    else:
+        return {"error": f"Failed to retrieve data. Status code: {response.status_code}"}
+    
+    unique_domains = set()
+    unique_analytics_data = []
+
+    for entry in analytics_data:
+        domain = entry.get('domain')
+        if domain and domain not in unique_domains:
+            unique_domains.add(domain)
+            if 'error' in entry:
+                del entry['error']
+            if 'status_code' in entry:
+                del entry['status_code']
+            if 'page_rank_integer' in entry:
+                entry['page_authority_int'] = entry.pop('page_rank_integer')
+            if 'page_rank_decimal' in entry:
+                entry['page_authority'] = entry.pop('page_rank_decimal')
+            unique_analytics_data.append(entry)
+        
+    return unique_analytics_data
 
 def get_web_links(search_query):
     """
@@ -93,6 +154,8 @@ def scrape_web_content(links, max_chars=MAX_SCRAPE_CHARS):
                     raw_data = soup.get_text(separator=" ", strip=True)
                     limited_data = raw_data[:max_chars]
                     content_dict[page_title] = (link, limited_data)
+                    domain = trim_www(urlparse(link).netloc)
+                    content_dict['domain'] = domain
                     success = True  # Mark as successful.
                 else:
                     logging.warning(f"WARNING: Unable to retrieve content from {link}. Status code: {response.status_code}")
@@ -111,6 +174,8 @@ def webscrap(search_query):
     #optimized_query = get_optimized_query(search_query)
     links = get_web_links(search_query)
     web_content = scrape_web_content(links)  # Uses default MAX_SCRAPE_CHARS limit.
+    analytics_data = fetch_analytics_data(links)
+    web_content = merge_dict_lists(web_content, analytics_data, 'domain')
     return web_content
 
 #print(webscrap("What is the trend in Apple's revenue and profit margins over the past five years, and how do they compare to industry benchmarks?"))

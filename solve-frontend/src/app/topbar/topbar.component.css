@@ -1,0 +1,23 @@
+.topbar {
+    width: 100%;
+    height: 40px;
+    background-color: #082c54;
+    display: flex;
+    align-items: center;
+    padding-left: 20px;
+  }
+  
+  button {
+    background-color: white;
+    border: none;
+    color: black;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 4px;
+  }
+  
+  button:hover {
+    background-color: lightgray;
+  }
+  

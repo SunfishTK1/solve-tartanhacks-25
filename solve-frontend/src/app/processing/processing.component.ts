@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { TopbarComponent } from '../topbar/topbar.component';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-processing',
@@ -11,7 +12,7 @@ import { TopbarComponent } from '../topbar/topbar.component';
   styleUrls: ['./processing.component.css']
 })
 export class ProcessingComponent implements OnInit {
-  researchTree: any[] = [];
+  researchUpdates: string = '';
   researchSentences: string[] = [
     'Analyzing market trends...',
     'Gathering competitor data...',
@@ -24,7 +25,9 @@ export class ProcessingComponent implements OnInit {
   processingComplete = false;
   processingStartTime!: number;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private http: HttpClient) {
+    this.startFetchingUpdates();
+  }
 
   ngOnInit() {
     this.processingStartTime = Date.now();
@@ -43,7 +46,7 @@ export class ProcessingComponent implements OnInit {
         return;
       }
       const sentence = this.getRandomSentence();
-      this.addToTree(sentence);
+      this.researchUpdates += sentence + '\n';
     }, 2000);
   }
 
@@ -51,12 +54,21 @@ export class ProcessingComponent implements OnInit {
     return this.researchSentences[Math.floor(Math.random() * this.researchSentences.length)];
   }
 
-  addToTree(sentence: string) {
-    if (this.researchTree.length === 0) {
-      this.researchTree.push({ topic: sentence, subtopics: [] });
-    } else {
-      const parentIndex = Math.floor(Math.random() * this.researchTree.length);
-      this.researchTree[parentIndex].subtopics.push({ topic: sentence, subtopics: [] });
-    }
+  private startFetchingUpdates() {
+    const interval = setInterval(() => {
+      this.http.get('https://18.191.231.140/read', { responseType: 'text' })
+        .subscribe({
+          next: (response) => {
+            this.researchUpdates = response;
+            if (response.includes('COMPLETE')) {  // Or whatever completion indicator you prefer
+              this.processingComplete = true;
+              clearInterval(interval);
+            }
+          },
+          error: (error) => {
+            console.error('Error fetching research updates:', error);
+          }
+        });
+    }, 1000); // Poll every second
   }
 }

@@ -12,7 +12,47 @@ logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 AWS_REGION = "us-east-1"
 
+FINAL_MODEL_ID = "us.anthropic.claude-3-5-haiku-20241022-v1:0"
+# Model used for summarizing each scraped page.
+SUMMARIZATION_MODEL_ID = "us.anthropic.claude-3-5-haiku-20241022-v1:0"  # Change if you have a dedicated summarization model.
+
+MAX_TOKENS_SUMMARY = 2500
+
 #print(webscrap("Crazy funny stories about peoples lunatic cats"))
+
+def summarize_page(title, link, content, client):
+    """
+    Uses the Converse API to summarize the provided webpage content.
+    The system prompt instructs the model to extract the most important points relevant to company analysis.
+    """
+    system_prompt = [
+        {
+            "text": (
+                f"Summarize the following webpage content in a concise manner. The page title is '{title}' and its URL is {link}. "
+                "Focus on extracting the most important details that would be useful for answering questions about the company."
+            )
+        }
+    ]
+    conversation = [
+        {
+            "role": "user",
+            "content": [{"text": f"Content: {content}"}]
+        }
+    ]
+    try:
+        response = client.converse(
+            modelId=SUMMARIZATION_MODEL_ID,
+            messages=conversation,
+            system=system_prompt,
+            inferenceConfig={"maxTokens": MAX_TOKENS_SUMMARY, "temperature": 0.5, "topP": 0.9},
+        )
+        summary_text = response["output"]["message"]["content"][0]["text"]
+        logging.info(f"Summary for '{title}' obtained.")
+        return summary_text.strip()
+    except Exception as e:
+        logging.error(f"Error summarizing page '{title}': {e}")
+        # Fallback: return a truncated version of the content if summarization fails.
+        return content[:500]
 
 def create_critical_investigation_questions(scraped_sources, investigation_question):
     """
@@ -233,7 +273,7 @@ def create_questions_list(company_name):
     client = boto3.client("bedrock-runtime", region_name=AWS_REGION)
     
     collected_questions = []
-    MAX_RECURSIONS = 10  # Maximum recursion depth to prevent infinite loops.
+    MAX_RECURSIONS = 10 #was 10  # Maximum recursion depth to prevent infinite loops.
     
     def process_model_response(conversation, recursion):
         model_id = "us.anthropic.claude-3-5-haiku-20241022-v1:0"
@@ -307,7 +347,7 @@ def process_questions(questions_list, company_name):
     """
     Process multiple questions concurrently using ThreadPoolExecutor.
     """
-    with ThreadPoolExecutor(max_workers=5) as executor:
+    with ThreadPoolExecutor(max_workers=4) as executor:
         # Submit ask_question for each question in the list
         future_to_question = {executor.submit(ask_question, question, company_name): question 
                               for question in questions_list}
@@ -337,9 +377,23 @@ def ask_question(input_query, company_name):
     company_name = company_name
 
     webscrap_result = webscrap(input_query)
-
-    # Start a conversation with the user message.
-    user_message = "Anwser the Question: " + input_query + "about the company, " + company_name + " Based on these web search results " + str(webscrap_result)
+    if not webscrap_result:
+        logging.error("No webscrap results found.")
+        return ""
+    
+    # Use the Converse API to summarize each scraped page.
+    summaries = []
+    for title, (link, content) in webscrap_result.items():
+        summary = summarize_page(title, link, content, client)
+        summaries.append(f"Title: {title}\nLink: {link}\nSummary: {summary}")
+    combined_summary = "\n\n".join(summaries)
+    #combined_summary = webscrap_result
+    
+    # Build the final prompt that includes the consolidated summaries.
+    user_message = (
+        f"Answer the question: {input_query} about the company, {company_name}. "
+        f"Use the following summarized web search results to inform your answer:\n\n{combined_summary}"
+    )
     conversation = [
         {
             "role": "user",
@@ -357,7 +411,7 @@ def ask_question(input_query, company_name):
 
         # Extract and print the response text.
         response_text = response["output"]["message"]["content"][0]["text"]
-        #print(response_text)
+        print(response_text)
         return response_text
 
     except (ClientError, Exception) as e:
@@ -369,4 +423,4 @@ def enter_company_name(company_name):
     questions_list = create_questions_list(company_name)
     process_questions(questions_list, company_name)
 
-enter_company_name("AppLovin")
+enter_company_name("Bank of Hawaii")

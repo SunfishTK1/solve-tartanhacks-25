@@ -1,40 +1,150 @@
-WARNING: Unable to retrieve content from https://www.barchart.com/story/news/30824196/applovin-stock-before-q4-earnings-to-buy-or-not-to-buy. Status code: 403
-WARNING: Unable to retrieve content from https://www.applovin.com/leadership/. Status code: 403
-WARNING: Unable to retrieve content from https://finance.yahoo.com/news/decoding-applovin-corp-app-strategic-050432151.html. Status code: 404
-WARNING: Unable to retrieve content from https://www.gurufocus.com/news/2181365/whats-driving-applovin-corps-surprising-23-stock-rally. Status code: 403
-WARNING: Unable to retrieve content from https://seekingalpha.com/article/4723107-applovins-profitability-and-free-cash-flow-a-recipe-for-stock-success. Status code: 403
-WARNING: Unable to retrieve content from https://finance.yahoo.com/news/know-beyond-why-applovin-corporation-140024134.html. Status code: 404
-WARNING: Unable to retrieve content from https://vizologi.com/business-strategy-canvas/applovin-business-model-canvas/. Status code: 403
-WARNING: Unable to retrieve content from https://www.quora.com/Which-is-better-Unity-Ads-or-AppLovin-for-20-CPM-for-Android-rewarded-ads. Status code: 403
-WARNING: Unable to retrieve content from https://www.quora.com/Which-is-the-best-ads-network-platform-Applovin-Unity-Ads-or-Google-AdSense. Status code: 403
-WARNING: Unable to retrieve content from https://www.sec.gov/Archives/edgar/data/1751008/000119312521065782/d73804ds1.htm. Status code: 403
-WARNING: Unable to retrieve content from https://www.linkedin.com/in/dahsiao. Status code: 999
-WARNING: Unable to retrieve content from https://www.linkedin.com/in/aliceliuahmed. Status code: 999
-ERROR: Can't invoke 'us.anthropic.claude-3-5-haiku-20241022-v1:0'. Reason: An error occurred (ValidationException) when calling the Converse operation: The model returned the following errors: Input is too long for requested model.
-WARNING: Unable to retrieve content from https://www.applovin.com/applovin-platform-data-processing-agreement/. Status code: 403
-ERROR: Exception occurred while scraping https://www.nasdaq.com/articles/applovin-stock-rises-800-year-buy-hold-or-sell: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
-WARNING: Unable to retrieve content from https://www.applovin.com/array-privacy-policy/. Status code: 403
-WARNING: Unable to retrieve content from https://www.applovin.com/array-privacy-policy-previous/. Status code: 403
-WARNING: Unable to retrieve content from https://upptic.com/applovin-from-start-up-to-ad-tech-giant-with-meteoric-growth/. Status code: 403
-WARNING: Unable to retrieve content from https://www.barchart.com/story/news/30125686/up-685-in-2024-is-it-too-late-to-buy-this-growth-stock. Status code: 403
-WARNING: Unable to retrieve content from https://finance.yahoo.com/news/decoding-applovin-corp-app-strategic-050432151.html. Status code: 404
-WARNING: Unable to retrieve content from https://finance.yahoo.com/news/decoding-applovin-corp-app-strategic-050336084.html. Status code: 404
-WARNING: Unable to retrieve content from https://www.applovin.com/applovin-demand-partner-data-processing-agreement/. Status code: 403
-ERROR: Can't invoke 'us.anthropic.claude-3-5-haiku-20241022-v1:0'. Reason: An error occurred (ValidationException) when calling the Converse operation: The model returned the following errors: too many total text bytes: 11094289 > 9000000
-WARNING: Unable to retrieve content from https://www.sramanamitra.com/2024/01/09/cloud-stocks-applovin-continues-to-deliver-with-ai/. Status code: 403
-WARNING: Unable to retrieve content from https://www.applovin.com/applovin-platform-data-processing-agreement/. Status code: 403
-WARNING: Unable to retrieve content from https://www.applovin.com/applovin-demand-partner-data-processing-agreement/. Status code: 403
-WARNING: Unable to retrieve content from https://www.applovin.com/privacy/. Status code: 403
-WARNING: Unable to retrieve content from https://www.applovin.com/applovin-policies-for-publishers-prior/. Status code: 403
-WARNING: Unable to retrieve content from https://www.quora.com/How-can-businesses-ensure-compliance-with-privacy-regulations-such-as-GDPR-and-CCPA-while-executing-digital-marketing-campaigns. Status code: 403
-ERROR: Can't invoke 'us.anthropic.claude-3-5-haiku-20241022-v1:0'. Reason: An error occurred (ValidationException) when calling the Converse operation: The model returned the following errors: Input is too long for requested model.
-ERROR: Can't invoke 'us.anthropic.claude-3-5-haiku-20241022-v1:0'. Reason: An error occurred (ValidationException) when calling the Converse operation: The model returned the following errors: Input is too long for requested model.
-WARNING: Unable to retrieve content from https://www.tipranks.com/stocks/app/risk-factors. Status code: 503
-WARNING: Unable to retrieve content from https://investors.applovin.com/news/news-details/2023/AppLovin-AI-Advancements-to-Accelerate-Partner-Growth/default.aspx. Status code: 403
-WARNING: Unable to retrieve content from https://seekingalpha.com/article/4695459-applovin-severely-undervalued-ai-company. Status code: 403
-WARNING: Unable to retrieve content from https://www.applovin.com/array-privacy-policy-previous/. Status code: 403
-WARNING: Unable to retrieve content from https://www.sec.gov/Archives/edgar/data/1751008/000175100823000048/app-20230331.htm. Status code: 403
-WARNING: Unable to retrieve content from https://www.applovin.com/terms/. Status code: 403
-WARNING: Unable to retrieve content from https://www.sec.gov/Archives/edgar/data/1751008/000119312521065782/d73804ds1.htm. Status code: 403
-ERROR: Can't invoke 'us.anthropic.claude-3-5-haiku-20241022-v1:0'. Reason: An error occurred (ValidationException) when calling the Converse operation: The model returned the following errors: Input is too long for requested model.
-ERROR: Can't invoke 'us.anthropic.claude-3-5-haiku-20241022-v1:0'. Reason: An error occurred (ValidationException) when calling the Converse operation: The model returned the following errors: Input is too long for requested model.
+Based on the provided search results, I cannot find specific details about Bank of Hawaii's digital transformation strategies and technology infrastructure investments. The search results are general articles about digital transformation in banking, but do not mention Bank of Hawaii specifically.
+
+To provide an accurate response about Bank of Hawaii's digital transformation efforts, I would recommend:
+
+1. Reviewing the bank's annual reports
+2. Checking their official website for technology initiatives
+3. Consulting investor relations materials
+4. Searching for recent press releases about their digital strategy
+
+Without specific source information about Bank of Hawaii, I cannot confidently describe their digital transformation approach. Any statement would be speculative.
+
+If you're seeking precise details about Bank of Hawaii's digital strategies, I suggest conducting a more targeted search or directly contacting the bank's corporate communications department for the most up-to-date information.
+
+Results for question: 'Can you provide details on the bank's digital transformation strategies and investments in technology infrastructure?'
+Based on the provided search results, I cannot find specific details about Bank of Hawaii's digital transformation strategies and technology infrastructure investments. The search results are general articles about digital transformation in banking, but do not mention Bank of Hawaii specifically.
+
+To provide an accurate response about Bank of Hawaii's digital transformation efforts, I would recommend:
+
+1. Reviewing the bank's annual reports
+2. Checking their official website for technology initiatives
+3. Consulting investor relations materials
+4. Searching for recent press releases about their digital strategy
+
+Without specific source information about Bank of Hawaii, I cannot confidently describe their digital transformation approach. Any statement would be speculative.
+
+If you're seeking precise details about Bank of Hawaii's digital strategies, I suggest conducting a more targeted search or directly contacting the bank's corporate communications department for the most up-to-date information.
+Based on the available search results, I cannot provide a detailed analysis of Bank of Hawaii's loan portfolio diversification, as the provided links are PDFs that cannot be read.
+
+To accurately answer this question, I would recommend:
+
+1. Consulting Bank of Hawaii's most recent annual report or 10-K filing
+2. Reviewing their investor relations materials
+3. Checking their quarterly financial statements
+
+Without specific source data, I can only offer a general observation: As a regional bank primarily serving Hawaii and the Pacific region, Bank of Hawaii likely has a loan portfolio concentrated in:
+
+- Commercial and real estate lending
+- Consumer loans
+- Small business loans
+- Loans tied to Hawaii's key industries like tourism, agriculture, and local services
+
+For a precise breakdown of their loan portfolio diversification across sectors and geographies, I recommend accessing their official financial disclosures directly.
+
+Would you like me to help you find more specific sources for this information?
+
+Results for question: 'How does Bank of Hawaii's loan portfolio diversification look across different sectors and geographies?'
+Based on the available search results, I cannot provide a detailed analysis of Bank of Hawaii's loan portfolio diversification, as the provided links are PDFs that cannot be read.
+
+To accurately answer this question, I would recommend:
+
+1. Consulting Bank of Hawaii's most recent annual report or 10-K filing
+2. Reviewing their investor relations materials
+3. Checking their quarterly financial statements
+
+Without specific source data, I can only offer a general observation: As a regional bank primarily serving Hawaii and the Pacific region, Bank of Hawaii likely has a loan portfolio concentrated in:
+
+- Commercial and real estate lending
+- Consumer loans
+- Small business loans
+- Loans tied to Hawaii's key industries like tourism, agriculture, and local services
+
+For a precise breakdown of their loan portfolio diversification across sectors and geographies, I recommend accessing their official financial disclosures directly.
+
+Would you like me to help you find more specific sources for this information?
+ERROR: Can't invoke 'us.anthropic.claude-3-5-haiku-20241022-v1:0'. Reason: An error occurred (ThrottlingException) when calling the Converse operation (reached max retries: 4): Too many tokens, please wait before trying again.
+ERROR: Can't invoke 'us.anthropic.claude-3-5-haiku-20241022-v1:0'. Reason: An error occurred (ThrottlingException) when calling the Converse operation (reached max retries: 4): Too many tokens, please wait before trying again.
+ERROR: Can't invoke 'us.anthropic.claude-3-5-haiku-20241022-v1:0'. Reason: An error occurred (ThrottlingException) when calling the Converse operation (reached max retries: 4): Too many tokens, please wait before trying again.
+ERROR: Can't invoke 'us.anthropic.claude-3-5-haiku-20241022-v1:0'. Reason: An error occurred (ThrottlingException) when calling the Converse operation (reached max retries: 4): Too many tokens, please wait before trying again.
+ERROR: Can't invoke 'us.anthropic.claude-3-5-haiku-20241022-v1:0'. Reason: An error occurred (ThrottlingException) when calling the Converse operation (reached max retries: 4): Too many tokens, please wait before trying again.
+ERROR: Can't invoke 'us.anthropic.claude-3-5-haiku-20241022-v1:0'. Reason: An error occurred (ThrottlingException) when calling the Converse operation (reached max retries: 4): Too many tokens, please wait before trying again.
+Based on the limited search results provided, I cannot definitively state Bank of Hawaii's specific AML and KYC compliance approach. However, I can provide a general perspective based on standard banking industry practices:
+
+Bank of Hawaii, like other regulated financial institutions, is likely to have a comprehensive compliance program that includes:
+
+1. Customer Due Diligence
+- Verifying customer identities
+- Collecting and maintaining accurate customer information
+- Performing risk assessments on new and existing customers
+
+2. Transaction Monitoring
+- Using automated systems to detect suspicious financial activities
+- Tracking and reporting unusual transaction patterns
+- Investigating potential money laundering risks
+
+3. Regulatory Compliance
+- Adhering to Bank Secrecy Act (BSA) requirements
+- Filing Suspicious Activity Reports (SARs)
+- Conducting regular internal audits and compliance checks
+
+4. Staff Training
+- Providing ongoing training to employees about AML/KYC regulations
+- Ensuring staff understand how to identify and report potential financial crimes
+
+For a precise description of Bank of Hawaii's specific AML and KYC approach, I recommend consulting their official compliance documentation or contacting the bank directly, as the provided search results do not offer specific details about their program.
+ERROR: Can't invoke 'us.anthropic.claude-3-5-haiku-20241022-v1:0'. Reason: An error occurred (ThrottlingException) when calling the Converse operation (reached max retries: 4): Too many tokens, please wait before trying again.
+ERROR: Can't invoke 'us.anthropic.claude-3-5-haiku-20241022-v1:0'. Reason: An error occurred (ThrottlingException) when calling the Converse operation (reached max retries: 4): Too many tokens, please wait before trying again.
+ERROR: Can't invoke 'us.anthropic.claude-3-5-haiku-20241022-v1:0'. Reason: An error occurred (ThrottlingException) when calling the Converse operation (reached max retries: 4): Too many tokens, please wait before trying again.
+Based on the limited search results provided, I cannot provide a comprehensive answer about how Bank of Hawaii has been specifically impacted by recent changes in Hawaiian tourism and real estate markets. The search results do not contain direct information about the bank's performance or challenges.
+
+However, the search results do suggest some positive economic indicators for Hawaii:
+- The state is forecasting a better economy in 2023 compared to the national outlook
+- Tourism appears to be rebounding, with tourists "solidly back in Hawaii" and helping to keep the economy moving
+
+To provide a more accurate and detailed response about Bank of Hawaii's specific situation, I would need additional sources or search results that directly discuss the bank's financial performance, loan portfolios, or strategic responses to market changes.
+
+If you're seeking a precise answer, I recommend consulting:
+- Bank of Hawaii's recent financial reports
+- Investor relations materials
+- Analyst reports about the bank's performance
+- Local business news sources with more detailed coverage
+I apologize, but the provided search results do not contain specific credit rating information for Bank of Hawaii. The search results primarily include information about Bank of America and a general Fitch Ratings page. To accurately answer the question about Bank of Hawaii's current credit rating and recent changes, I would need additional search results or sources specifically related to Bank of Hawaii's credit ratings.
+
+For the most up-to-date and accurate credit rating information, I recommend:
+1. Checking official credit rating agency websites like Moody's, Standard & Poor's, or Fitch Ratings
+2. Reviewing Bank of Hawaii's investor relations website
+3. Consulting financial databases or recent financial reports of the bank
+Based on the search results, Bank of Hawaii has several key competitive advantages in the Hawaiian banking market:
+
+1. Local Market Expertise
+- Deep understanding of Hawaii's unique financial landscape
+- Strong commitment to community banking
+- Established presence and reputation in the local market
+
+2. Financial Performance
+- Consistently high financial performance
+- Strong Return on Equity (17%)
+- Conservative lending standards
+- Profitable financial institution
+
+3. Diversified Income Sources
+- Balanced portfolio with significant investment income (39% of interest income)
+- More diversified revenue streams compared to competitors
+- Larger investment portfolio ($7.1 billion)
+
+4. Independent Ownership
+- Publicly traded corporation
+- Not a subsidiary of a larger international bank
+- Allows for more localized decision-making and strategy
+
+5. Core Deposit Focus
+- Strong emphasis on core deposits
+- More demand deposits compared to competitors
+- Stable funding base
+
+6. Community-Oriented Approach
+- Committed to local community development
+- Supports local businesses and initiatives
+- Provides personalized banking experiences
+
+These advantages position Bank of Hawaii as a leading and trusted financial institution in the Hawaiian banking market, with a strong focus on local needs and financial stability.

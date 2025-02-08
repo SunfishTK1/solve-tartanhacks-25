@@ -1,37 +1,34 @@
 <app-topbar></app-topbar>
-
 <div class="chat-container">
-  <!-- Static "Solve" with Animated Ellipses -->
-  <h1 class="animated-title">
-    <span class="static-title">Solve</span><span class="animated-ellipses">{{ ellipses }}</span>
-  </h1>
-
-  <!-- Input Fields -->
-  <div class="input-group" *ngFor="let field of inputFields; let i = index">
-    <input
-      type="text"
-      [placeholder]="field.placeholder"
-      [(ngModel)]="field.value"
-      [readonly]="field.locked"
-      (keydown.enter)="handleEnter(i)"
-      (click)="enableEditing(i)"
+  <h1>Company Analysis</h1>
+  
+  <div class="input-container">
+    <input 
+      [(ngModel)]="company_name"
+      placeholder="Enter company name(s)"
+      class="chat-input"
     />
   </div>
 
-  <!-- Section Header Above Checkboxes -->
-  <h3 *ngIf="showCheckboxes" class="checkbox-header">Choose key sections for your report</h3>
+  <div class="input-container" *ngIf="company_name">
+    <input
+      [(ngModel)]="industry"
+      placeholder="Enter the industry"
+      class="chat-input"
+    />
+  </div>
 
-  <!-- Display checkboxes after industry input is locked -->
-  <div *ngIf="showCheckboxes" class="checkbox-container">
-    <div class="checkbox-column" *ngFor="let checkbox of checkboxes; let i = index">
-      <label class="custom-checkbox">
-        <input type="checkbox" [(ngModel)]="checkbox.checked" (click)="toggleCheckbox(i)">
-        <span class="checkmark"></span>
-        {{ checkbox.label }}
+  <div *ngIf="industry" class="checkbox-container">
+    <h2>Select Analysis Topics:</h2>
+    <div class="checkbox-grid">
+      <label *ngFor="let prompt of promptOptions">
+        <input type="checkbox" [(ngModel)]="selectedPrompts" [value]="prompt" />
+        {{ prompt }}
       </label>
     </div>
   </div>
-  <!-- Submit Button -->
-<button *ngIf="showCheckboxes" class="submit-button" (click)="submitForm()">Submit</button>
 
+  <button *ngIf="industry" class="submit-button" (click)="sendUserData()">
+    Submit
+  </button>
 </div>

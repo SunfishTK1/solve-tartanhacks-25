@@ -6,11 +6,11 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class ChatApiService {
-  private apiUrl = 'http://localhost:5000/api/chat'; // Update w backend
+  private apiUrl = 'http://0.0.0.0:8007/analyze'; // Updated API endpoint
 
   constructor(private http: HttpClient) {}
 
-  sendMessage(message: string): Observable<any> {
-    return this.http.post<any>(this.apiUrl, { message });
+  sendUserData(userData: { company_name: string; industry: string; prompts: string[] }): Observable<any> {
+    return this.http.post(this.apiUrl, userData);
   }
 }

@@ -13,6 +13,18 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./chat.component.css']
 })
 export class ChatComponent {
+  company_name: string = '';
+  industry: string = '';
+  promptOptions: string[] = [
+    'Operations and Management',
+    'Market Risks',
+    'Competitor Analysis',
+    'Potential Concerns',
+    'Industry Benchmarks',
+    'Legal Standing'
+  ];
+  selectedPrompts: string[] = [];
+  
   inputFields: { value: string, placeholder: string, locked: boolean }[] = [
     { value: '', placeholder: 'Enter company name(s)', locked: false }
   ];
@@ -28,17 +40,11 @@ export class ChatComponent {
     { label: 'Legal Standing', checked: false }
   ];
 
-  ellipses: string = ''; 
-  ellipsesCount: number = 0;
-
-  constructor(private router: Router, private chatApi: ChatApiService) {
-    this.animateEllipses();
-  }
+  constructor(private router: Router, private chatApi: ChatApiService) {}
 
   handleEnter(index: number) {
     if (!this.inputFields[index].locked) {
       this.inputFields[index].locked = true;
-
       if (index === 0 && !this.industryInputAdded) {
         this.inputFields.push({ value: '', placeholder: 'Enter the industry', locked: false });
         this.industryInputAdded = true;
@@ -56,22 +62,21 @@ export class ChatComponent {
     this.checkboxes[index].checked = !this.checkboxes[index].checked;
   }
 
-  submitForm() {
-    this.router.navigate(['/processing']);
-  }
+  sendUserData() {
+    const userData = {
+      company_name: this.company_name,
+      industry: this.industry,
+      prompts: this.selectedPrompts
+    };
 
-  animateEllipses() {
-    setInterval(() => {
-      if (this.ellipsesCount < 3) {
-        this.ellipsesCount++;
-        this.ellipses = '.'.repeat(this.ellipsesCount);
-      } else {
-        this.ellipses = '...'; 
-        setTimeout(() => {
-          this.ellipsesCount = 0;
-          this.ellipses = ''; 
-        }, 400);
+    this.chatApi.sendUserData(userData).subscribe({
+      next: (response) => {
+        console.log('Data successfully sent to backend:', response);
+        this.router.navigate(['/processing']);
+      },
+      error: (error) => {
+        console.error('Error sending data:', error);
       }
-    }, 600); // Adjust animation speed
+    });
   }
 }

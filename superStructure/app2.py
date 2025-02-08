@@ -130,6 +130,7 @@ def analyze_company():
         "industry": "Retail"  // Echoed back if provided
     }
     """
+    print("Analysis Start")
     data = request.json
     company_name = data.get("company_name")
     industry = data.get("industry")  # New field for industry information.
@@ -141,8 +142,10 @@ def analyze_company():
     try:
         # Call the existing backend analysis function.
         # If desired, you could create a separate function that also uses industry.
+        print("called")
         result = enter_company_name(company_name, uuid_value, industry)
-        
+        print("return from function")
+
         # If industry is provided, attach it to the result.
         if industry:
             result["industry"] = industry

@@ -61,6 +61,10 @@ def summarize_page(title: str, link: str, content: str, client: boto3.client, uu
     :param client: Bedrock runtime client.
     :return: The summary text (or a fallback substring of content).
     """
+    model_ids = ["us.anthropic.claude-3-5-haiku-20241022-v1:0", "us.amazon.nova-pro-v1:0", "us.meta.llama3-3-70b-instruct-v1:0", "us.meta.llama3-2-3b-instruct-v1:0"], 
+    model_id = ""
+    SUMMARIZATION_MODEL_ID = ""
+    SUMMARIZATION_MODEL_ID = random.choice(model_ids[0])
     system_prompt = [{
         "text": (
             f"Summarize the following webpage content in a concise manner. The page title is '{title}' and its URL is {link}. "
@@ -88,7 +92,7 @@ def summarize_page(title: str, link: str, content: str, client: boto3.client, uu
         return content[:500]
 
 
-def create_critical_investigation_questions(scraped_sources: List[str], investigation_question: str) -> List[str]:
+def create_critical_investigation_questions(scraped_sources: List[str], investigation_question: str, uuid) -> List[str]:
     """
     Generates critical follow-up investigation questions based on scraped sources.
     
@@ -134,7 +138,7 @@ def create_critical_investigation_questions(scraped_sources: List[str], investig
         "follow-up questions that probe for serious issues, red flags, or gaps in the information. "
         "Do NOT output the questions as one block of text. Instead, for each question, call the 'CriticalQuestion_Tool' "
         "by issuing a tool call. Each tool call must have an input JSON with a field 'question' containing one "
-        "critical investigation question."
+        "critical investigation question.  Always mention the company name explicitly in the question."
     )
     system_prompt = [{"text": system_prompt_text}]
     user_message_text = (
@@ -145,10 +149,14 @@ def create_critical_investigation_questions(scraped_sources: List[str], investig
     tool_config = {"tools": [get_critical_question_tool_spec()]}
     client = boto3.client("bedrock-runtime", region_name=AWS_REGION)
     collected_questions: List[str] = []
-    MAX_RECURSIONS = 5
+    MAX_RECURSIONS = 3
 
     def process_model_response(conversation: List[Dict[str, Any]], recursion: int):
-        model_id = "us.anthropic.claude-3-5-haiku-20241022-v1:0"
+
+        model_ids = ["us.anthropic.claude-3-5-haiku-20241022-v1:0", "us.amazon.nova-pro-v1:0", "us.meta.llama3-3-70b-instruct-v1:0", "us.anthropic.claude-3-5-sonnet-20241022-v2:0"], 
+        model_id = ""
+        model_id = random.choice(model_ids[0])
+        #model_id = "us.meta.llama3-3-70b-instruct-v1:0"
         if recursion <= 0:
             logging.warning("Max recursion reached; stopping further requests.")
             return
@@ -167,6 +175,16 @@ def create_critical_investigation_questions(scraped_sources: List[str], investig
 
         stop_reason = response.get("stopReason", "")
         assistant_message = response.get("output", {}).get("message", {})
+        
+        content = assistant_message.get("content", [])
+        has_tool = any("toolUse" in block for block in content)
+        has_text = any("text" in block for block in content)
+        if has_tool and has_text:
+            # Keep only tool-use blocks (or alternatively split into two messages)
+            assistant_message["content"] = [block for block in content if "toolUse" in block]
+        # *** END NEW CODE ***
+
+
         conversation.append(assistant_message)
 
         tool_uses = [block["toolUse"] for block in assistant_message.get("content", [])
@@ -243,6 +261,7 @@ def create_questions_list(company_name: str, uuid) -> List[str]:
         "Each tool call must have an input JSON with a field 'question' containing one due diligence question. "
         "Ensure that the questions cover areas such as financial performance, market position, management, "
         "operational risks, regulatory compliance, competitive landscape, growth strategy, and potential red flags."
+        " Always mention the company name explicitly in the question."
     )
     system_prompt = [{"text": system_prompt_text}]
     user_message_text = f"Generate separate due diligence questions for '{company_name}' using tool calls."
@@ -250,7 +269,7 @@ def create_questions_list(company_name: str, uuid) -> List[str]:
     tool_config = {"tools": [get_question_tool_spec()]}
     client = boto3.client("bedrock-runtime", region_name=AWS_REGION)
     collected_questions: List[str] = []
-    MAX_RECURSIONS = 5
+    MAX_RECURSIONS = 10
 
     def process_model_response(conversation: List[Dict[str, Any]], recursion: int):
         model_id = "us.anthropic.claude-3-5-haiku-20241022-v1:0"
@@ -306,7 +325,7 @@ def create_questions_list(company_name: str, uuid) -> List[str]:
     return collected_questions
 
 
-def ask_question(input_query: str, company_name: str, uuid) -> str:
+def ask_question(input_query: str, company_name: str, uuid, depth) -> str:
     """
     Given an input query and company name, this function scrapes relevant pages,
     summarizes them, and uses the consolidated summaries as context to answer the question.
@@ -316,7 +335,9 @@ def ask_question(input_query: str, company_name: str, uuid) -> str:
     :return: The answer text from the model.
     """
     client = boto3.client("bedrock-runtime", region_name=AWS_REGION)
-    model_id = "us.anthropic.claude-3-5-haiku-20241022-v1:0"
+    model_ids = ["us.anthropic.claude-3-5-haiku-20241022-v1:0", "us.amazon.nova-pro-v1:0", "us.meta.llama3-3-70b-instruct-v1:0", "us.meta.llama3-2-3b-instruct-v1:0", "us.amazon.nova-micro-v1:0", "us.amazon.nova-lite-v1:0"], 
+    model_id = ""
+    model_id = random.choice(model_ids[0])
 
     webscrap_result = webscrap(input_query)
     if not webscrap_result:
@@ -329,7 +350,11 @@ def ask_question(input_query: str, company_name: str, uuid) -> str:
         summaries.append(f"Title: {title}\nLink: {link}\nSummary: {summary}")
     combined_summary = "\n\n".join(summaries)
 
-    additional_data = create_critical_investigation_questions(summaries, input_query)
+    if depth < 2:
+        additional_questions = create_critical_investigation_questions(summaries, input_query, uuid)
+        results_2 = process_questions(additional_questions, company_name, uuid, depth + 1)
+    else:
+        results_2 = []
     
     user_message = (
         f"Answer the question: {input_query} about the company, {company_name}. "
@@ -347,22 +372,23 @@ def ask_question(input_query: str, company_name: str, uuid) -> str:
         )
         response_text = response["output"]["message"]["content"][0]["text"]
         #print(response_text)
-        return response_text
+        return [response_text, results_2]
     except Exception as e:
         logging.error(f"ERROR: Can't invoke '{model_id}'. Reason: {e}")
         exit(1)
 
 
-def process_questions(questions_list: List[str], company_name: str, uuid) -> None:
+def process_questions(questions_list: List[str], company_name: str, uuid, depth) -> None:
     """
     Processes multiple questions concurrently using a thread pool.
     
     :param questions_list: List of questions to ask.
     :param company_name: The company name to include in the query.
     """
-    with ThreadPoolExecutor(max_workers=4) as executor:
+    
+    with ThreadPoolExecutor(max_workers=2) as executor:
         future_to_question = {
-            executor.submit(ask_question, question, company_name, uuid): question
+            executor.submit(ask_question, question, company_name, uuid, depth): question
             for question in questions_list
         }
         return_me_result = []
@@ -372,11 +398,61 @@ def process_questions(questions_list: List[str], company_name: str, uuid) -> Non
                 result = future.result()
                 #print(f"\nResults for question: '{question}'")
                 #print(result)
-                return_me_result.append([question, result])
+                return_me_result.append({ "question" : question, "result" : result[0], "depth" : int(depth), "other_questions" : result[1] })
             except Exception as e:
                 print(f"Exception for question '{question}': {str(e)}")
         return return_me_result
 
+def generate_full_report(save_questions: List[Dict[str, Any]], company_name: str, uuid) -> str:
+    """
+    Generates a comprehensive due diligence and market analysis report based on the research data
+    saved in save_questions.
+    
+    :param save_questions: A list of dictionaries containing due diligence questions and answers.
+    :param company_name: The name of the company.
+    :param uuid: Unique identifier (for logging or tracking purposes).
+    :return: The full report as a text string.
+    """
+    client = boto3.client("bedrock-runtime", region_name=AWS_REGION)
+    model_id = FINAL_MODEL_ID
+
+    # Combine the research data from save_questions into a single string.
+    research_data = ""
+    for item in save_questions:
+        question = item.get("question", "")
+        answer = item.get("result", "")
+        research_data += f"Question: {question}\nAnswer: {answer}\n\n"
+
+    # Create instructions for the full report.
+    report_instructions = (
+        f"You are a seasoned financial analyst and market researcher. Based on the following due diligence and market research data for '{company_name}', "
+        "generate a comprehensive due diligence and market analysis report. The report should include detailed analysis on financial performance, market position, "
+        "management quality, operational risks, regulatory compliance, competitive landscape, growth strategy, and potential red flags. "
+        "Ensure that the report is well-structured, thorough, and insightful.\n\n"
+        f"Research Data:\n{research_data}"
+    )
+    report_instructions = (
+        f"You are a seasoned financial analyst and market researcher. Based on the following due diligence and market research data for '{company_name}', "
+        "generate a comprehensive due diligence and market analysis abstract for the report based on the data provided. The report should include detailed analysis on financial performance, market position, "
+        "management quality, operational risks, regulatory compliance, competitive landscape, growth strategy, and potential red flags. "
+        "Ensure that the report is well-structured, thorough, and insightful.\n\n"
+        f"Research Data:\n{research_data}"
+    )
+    conversation = [{"role": "user", "content": [{"text": report_instructions}]}]
+
+    try:
+        response = invoke_converse_with_retries(
+            client,
+            modelId=model_id,
+            messages=conversation,
+            inferenceConfig={"maxTokens": 1024, "temperature": 0.5, "topP": 0.9},
+        )
+        full_report_text = response["output"]["message"]["content"][0]["text"]
+        logging.info("Full report generated successfully.")
+        return full_report_text.strip()
+    except Exception as e:
+        logging.error(f"Error generating full report: {e}")
+        return "Error generating full report."
 
 def enter_company_name(company_name: str, uuid="NONE") -> None:
     """
@@ -386,8 +462,9 @@ def enter_company_name(company_name: str, uuid="NONE") -> None:
     """
     # You may use a hard-coded list or dynamically generate one:
     questions_list = create_questions_list(company_name, uuid)
-    return process_questions(questions_list, company_name, uuid)
-
+    save_questions = process_questions(questions_list, company_name, uuid, depth=1)
+    full_report = generate_full_report(save_questions, company_name, uuid)
+    return {"full report": full_report, "subquestions": save_questions}
 
 # Example usage:
-print(enter_company_name("Perplexity"))
+print(enter_company_name("Millies Coffee and Creamery of Pittsburgh, PA", "1234"))

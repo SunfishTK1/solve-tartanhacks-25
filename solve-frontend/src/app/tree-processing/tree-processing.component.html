@@ -23,4 +23,43 @@
     </ul>
   </div>
   <h2 *ngIf="processingComplete" class="completion-text">Analysis complete</h2>
+</div>
+
+<app-topbar></app-topbar>
+
+<div class="main-container">
+  <div class="summary-section">
+    <h2>Research Summary</h2>
+    <p>{{ summary }}</p>
+  </div>
+
+  <div class="content-container">
+    <div class="graph-container">
+      <ngx-graph
+        [links]="graphData.links"
+        [nodes]="graphData.nodes"
+        [autoCenter]="true"
+        [autoZoom]="true"
+        [curve]="curve"
+        (nodeClick)="selectedNode = $event.data">
+      </ngx-graph>
+    </div>
+
+    <div class="sidebar">
+      <mat-accordion>
+        <mat-expansion-panel *ngFor="let node of researchTree">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              {{ node.title }}
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <p>{{ node.content }}</p>
+          <div *ngIf="node.metrics" class="metrics">
+            <p>Authority: {{ node.metrics.authority }}</p>
+            <p>Relevance: {{ node.metrics.relevance }}</p>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </div>
+  </div>
 </div> 

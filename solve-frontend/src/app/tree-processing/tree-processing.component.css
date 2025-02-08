@@ -100,4 +100,52 @@ h1 {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+.main-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 20px;
+}
+
+.summary-section {
+  background: white;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.content-container {
+  display: flex;
+  flex: 1;
+  gap: 20px;
+}
+
+.graph-container {
+  flex: 1;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.sidebar {
+  width: 300px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  overflow-y: auto;
+}
+
+.metrics {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+}
+
+ngx-graph {
+  height: 100%;
+  width: 100%;
 } 

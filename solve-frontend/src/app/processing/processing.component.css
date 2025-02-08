@@ -1,0 +1,50 @@
+.processing-container {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    margin-top: 20px;
+  }
+  
+  .tree-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  
+  .tree-container ul {
+    list-style-type: none;
+    padding: 0;
+    position: relative;
+  }
+  
+  .tree-container ul li {
+    padding: 8px 12px;
+    position: relative;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    margin: 8px;
+    background-color: #f9f9f9;
+  }
+  
+  .tree-container ul li::before,
+  .tree-container ul li::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 1px;
+    height: 10px;
+    background-color: #ccc;
+  }
+  
+  .tree-container ul li::after {
+    left: auto;
+    right: 50%;
+  }
+  
+  .completion-text {
+    font-size: 24px;
+    font-weight: bold;
+    color: #082c54;
+    margin-top: 20px;
+  }

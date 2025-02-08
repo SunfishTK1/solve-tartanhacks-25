@@ -4,20 +4,23 @@ import threading
 import time
 
 # -------------------------------
-# Helper function: recursively display subquestions
+# Helper function: recursively display questions with a toggle.
 # -------------------------------
-def display_subquestions(questions):
-    """
-    Recursively display a list of subquestions using expanders.
-    Each question expands to show its result and, if available,
-    nested subquestions.
-    """
-    for q in questions:
-        with st.expander(q.get("question", "Question")):
+def display_questions(questions, indent=0, parent_key=""):
+    for i, q in enumerate(questions):
+        # Create a unique key for each question.
+        unique_key = f"{parent_key}_{i}" if parent_key else str(i)
+        with st.expander(q.get("question", "Question"), expanded=False):
             st.markdown(q.get("result", "No answer available."))
-            # If there are nested subquestions, display them recursively.
+            # If there are subquestions, show a checkbox to toggle their display.
             if q.get("other_questions"):
-                display_subquestions(q["other_questions"])
+                toggle_key = f"toggle_{unique_key}"
+                show_sub = st.checkbox("Show subquestions", key=toggle_key)
+                if show_sub:
+                    # Use HTML to add left margin for visual indentation.
+                    st.markdown(f"<div style='margin-left: {indent * 20 + 20}px;'>", unsafe_allow_html=True)
+                    display_questions(q["other_questions"], indent=indent+1, parent_key=unique_key)
+                    st.markdown("</div>", unsafe_allow_html=True)
 
 # -------------------------------
 # Function to call the API in a thread.
@@ -39,9 +42,7 @@ def call_api(company, industry, result_container):
 # -------------------------------
 # Main Streamlit App
 # -------------------------------
-
 st.set_page_config(page_title="Due Diligence Analysis", layout="wide")
-
 st.title("Company Due Diligence Analysis")
 st.markdown("Enter the details of the company you wish to analyze and click submit.")
 
@@ -70,7 +71,6 @@ if st.button("Submit Analysis"):
             "Almost done..."
         ]
         i = 0
-        # While the API call thread is alive, update the message.
         while thread.is_alive():
             loading_placeholder.text(loading_phrases[i % len(loading_phrases)])
             time.sleep(0.5)
@@ -83,7 +83,6 @@ if st.button("Submit Analysis"):
             st.error(f"Error calling API: {result_container['error']}")
         else:
             result = result_container.get("data", {})
-            # Parse the full report from the result.
             full_report = result.get("full report", "No report available.")
             # Assume the first line is the title and the rest is the abstract.
             lines = full_report.split("\n")
@@ -104,7 +103,7 @@ if st.button("Submit Analysis"):
             subquestions = result.get("subquestions", [])
             if subquestions:
                 st.markdown("## Due Diligence Questions")
-                display_subquestions(subquestions)
+                display_questions(subquestions)
             else:
                 st.info("No subquestions returned.")
 

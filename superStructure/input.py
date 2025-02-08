@@ -6,11 +6,13 @@ from botocore.exceptions import ClientError
 from concurrent.futures import ThreadPoolExecutor, as_completed
 #import utils.tool_use_print_utils as output
 #import weather_tool
+from webscrap import webscrap
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 AWS_REGION = "us-east-1"
 
+#print(webscrap("Crazy funny stories about peoples lunatic cats"))
 
 def create_critical_investigation_questions(scraped_sources, investigation_question):
     """
@@ -334,8 +336,10 @@ def ask_question(input_query, company_name):
 
     company_name = company_name
 
+    webscrap_result = webscrap(input_query)
+
     # Start a conversation with the user message.
-    user_message = "Anwser the question about the company, " + company_name + " Question: " + input_query + " Add the question to the top of your response"
+    user_message = "Anwser the Question: " + input_query + "about the company, " + company_name + " Based on these web search results " + str(webscrap_result)
     conversation = [
         {
             "role": "user",
@@ -365,4 +369,4 @@ def enter_company_name(company_name):
     questions_list = create_questions_list(company_name)
     process_questions(questions_list, company_name)
 
-enter_company_name("Apple")
+enter_company_name("AppLovin")

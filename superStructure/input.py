@@ -6,6 +6,7 @@ from typing import Any, Dict, List
 
 from botocore.exceptions import ClientError
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import TimeoutError
 
 from webscrap import webscrap  # Assumed to be defined elsewhere
 
@@ -18,7 +19,7 @@ SUMMARIZATION_MODEL_ID = "us.amazon.nova-pro-v1:0"
 MAX_TOKENS_SUMMARY = 2500  # Adjust if necessary
 
 # Global maximum number of retries for converse calls.
-MAX_RETRIES = 5
+MAX_RETRIES = 1
 
 
 def invoke_converse_with_retries(client: boto3.client, **kwargs) -> Dict[str, Any]:
@@ -61,7 +62,7 @@ def summarize_page(title: str, link: str, content: str, client: boto3.client, uu
     :param client: Bedrock runtime client.
     :return: The summary text (or a fallback substring of content).
     """
-    model_ids = ["us.anthropic.claude-3-5-haiku-20241022-v1:0", "us.amazon.nova-pro-v1:0", "us.meta.llama3-3-70b-instruct-v1:0", "us.meta.llama3-2-3b-instruct-v1:0"], 
+    model_ids = ["us.amazon.nova-lite-v1:0"], 
     model_id = ""
     SUMMARIZATION_MODEL_ID = ""
     SUMMARIZATION_MODEL_ID = random.choice(model_ids[0])
@@ -149,11 +150,11 @@ def create_critical_investigation_questions(scraped_sources: List[str], investig
     tool_config = {"tools": [get_critical_question_tool_spec()]}
     client = boto3.client("bedrock-runtime", region_name=AWS_REGION)
     collected_questions: List[str] = []
-    MAX_RECURSIONS = 3
+    MAX_RECURSIONS = 1
 
     def process_model_response(conversation: List[Dict[str, Any]], recursion: int):
 
-        model_ids = ["us.anthropic.claude-3-5-haiku-20241022-v1:0", "us.amazon.nova-pro-v1:0", "us.meta.llama3-3-70b-instruct-v1:0", "us.anthropic.claude-3-5-sonnet-20241022-v2:0"], 
+        model_ids = ["us.anthropic.claude-3-5-haiku-20241022-v1:0"], 
         model_id = ""
         model_id = random.choice(model_ids[0])
         #model_id = "us.meta.llama3-3-70b-instruct-v1:0"
@@ -206,7 +207,7 @@ def create_critical_investigation_questions(scraped_sources: List[str], investig
                 })
             conversation.append({"role": "user", "content": tool_result_contents})
             process_model_response(conversation, recursion - 1)
-        elif stop_reason != "end_turn" and len(collected_questions) < 5:
+        elif stop_reason != "end_turn" and len(collected_questions) < MAX_RECURSIONS:
             conversation.append({
                 "role": "user",
                 "content": [{"text": "Please provide additional critical investigation questions using tool calls."}]
@@ -269,7 +270,7 @@ def create_questions_list(company_name: str, uuid) -> List[str]:
     tool_config = {"tools": [get_question_tool_spec()]}
     client = boto3.client("bedrock-runtime", region_name=AWS_REGION)
     collected_questions: List[str] = []
-    MAX_RECURSIONS = 10
+    MAX_RECURSIONS = 5
 
     def process_model_response(conversation: List[Dict[str, Any]], recursion: int):
         model_id = "us.anthropic.claude-3-5-haiku-20241022-v1:0"
@@ -312,7 +313,7 @@ def create_questions_list(company_name: str, uuid) -> List[str]:
                 })
             conversation.append({"role": "user", "content": tool_result_contents})
             process_model_response(conversation, recursion - 1)
-        elif stop_reason != "end_turn" and len(collected_questions) < 10:
+        elif stop_reason != "end_turn" and len(collected_questions) < MAX_RECURSIONS:
             conversation.append({
                 "role": "user",
                 "content": [{"text": "Please provide additional due diligence questions using tool calls."}]
@@ -335,7 +336,7 @@ def ask_question(input_query: str, company_name: str, uuid, depth) -> str:
     :return: The answer text from the model.
     """
     client = boto3.client("bedrock-runtime", region_name=AWS_REGION)
-    model_ids = ["us.anthropic.claude-3-5-haiku-20241022-v1:0", "us.amazon.nova-pro-v1:0", "us.meta.llama3-3-70b-instruct-v1:0", "us.meta.llama3-2-3b-instruct-v1:0", "us.amazon.nova-micro-v1:0", "us.amazon.nova-lite-v1:0"], 
+    model_ids = ["us.amazon.nova-lite-v1:0"],  #"us.anthropic.claude-3-5-haiku-20241022-v1:0", 
     model_id = ""
     model_id = random.choice(model_ids[0])
 
@@ -345,10 +346,11 @@ def ask_question(input_query: str, company_name: str, uuid, depth) -> str:
         return ""
     
     summaries = []
-    for title, (link, content) in webscrap_result.items():
-        summary = summarize_page(title, link, content, client, uuid)
-        summaries.append(f"Title: {title}\nLink: {link}\nSummary: {summary}")
-    combined_summary = "\n\n".join(summaries)
+    #for title, (link, content) in webscrap_result.items():
+    #    summary = summarize_page(title, link, content, client, uuid)
+    #    summaries.append(f"Title: {title}\nLink: {link}\nSummary: {summary}")
+    #combined_summary = "\n\n".join(summaries)
+    combined_summary = str(webscrap_result.items())
 
     if depth < 2:
         additional_questions = create_critical_investigation_questions(summaries, input_query, uuid)
@@ -386,7 +388,7 @@ def process_questions(questions_list: List[str], company_name: str, uuid, depth)
     :param company_name: The company name to include in the query.
     """
     
-    with ThreadPoolExecutor(max_workers=2) as executor:
+    with ThreadPoolExecutor(max_workers=10) as executor:
         future_to_question = {
             executor.submit(ask_question, question, company_name, uuid, depth): question
             for question in questions_list

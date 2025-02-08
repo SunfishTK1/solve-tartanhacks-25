@@ -86,7 +86,7 @@ def scrape_web_content(links, max_chars=MAX_SCRAPE_CHARS):
         while attempts < MAX_RETRIES and not success:
             try:
                 logging.info(f"Scraping {link} (Attempt {attempts + 1}/{MAX_RETRIES})...")
-                response = requests.get(link, timeout=10)
+                response = requests.get(link, timeout=1)
                 if response.status_code == 200:
                     soup = BeautifulSoup(response.content, 'html.parser')
                     page_title = soup.title.string.strip() if soup.title and soup.title.string else link

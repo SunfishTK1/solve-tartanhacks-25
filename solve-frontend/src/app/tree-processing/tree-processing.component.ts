@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { TopbarComponent } from '../topbar/topbar.component';
@@ -8,6 +8,7 @@ import { SessionService } from '../services/session.service';
 import { NgxGraphModule } from '@swimlane/ngx-graph';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { SummaryService } from '../services/summary.service';
 
 @Component({
   selector: 'app-tree-processing',
@@ -23,18 +24,19 @@ import { MatExpansionModule } from '@angular/material/expansion';
   styleUrls: ['./tree-processing.component.css']
 })
 
-export class TreeProcessingComponent implements OnInit {
+export class TreeProcessingComponent implements OnInit, OnDestroy {
   sessionId: string = '';
   researchTree: TreeNode[] = [];
   processingComplete = false;
   graphData: any = { nodes: [], links: [] };
-  summary: string = '';
-  selectedNode: TreeNode | null = null;
+  currentSummary: string = 'Initializing research...';
+  private summaryInterval: any;
 
   constructor(
     private router: Router, 
     private http: HttpClient,
-    private sessionService: SessionService
+    private sessionService: SessionService,
+    private summaryService: SummaryService
   ) {}
 
   ngOnInit() {
@@ -42,9 +44,40 @@ export class TreeProcessingComponent implements OnInit {
     if (existingSessionId) {
       this.sessionId = existingSessionId;
       this.startFetchingUpdates();
+      this.startFetchingSummary();
     } else {
       this.createSession();
     }
+  }
+
+  ngOnDestroy() {
+    if (this.summaryInterval) {
+      clearInterval(this.summaryInterval);
+    }
+  }
+
+  private startFetchingSummary() {
+    // Initial fetch
+    this.fetchSummary();
+    
+    // Set up periodic fetching
+    this.summaryInterval = setInterval(() => {
+      this.fetchSummary();
+    }, 2000); // Poll every 2 seconds
+  }
+
+  private fetchSummary() {
+    this.http.get<{content: string}>(`https://18.191.231.140/get_summary?session_id=${this.sessionId}`)
+      .subscribe({
+        next: (response) => {
+          if (response && response.content) {
+            this.currentSummary = response.content;
+          }
+        },
+        error: (error) => {
+          console.error('Error fetching summary:', error);
+        }
+      });
   }
 
   private createSession() {
@@ -52,6 +85,7 @@ export class TreeProcessingComponent implements OnInit {
       next: (response) => {
         this.sessionId = response.session_id;
         this.startFetchingUpdates();
+        this.startFetchingSummary();
       },
       error: (error) => {
         console.error('Error creating session:', error);
@@ -82,8 +116,8 @@ export class TreeProcessingComponent implements OnInit {
 
   private updateGraphData(response: TreeNode[]) {
     this.researchTree = response;
+    this.summaryService.updateSummaries(response);  // Update summaries
     this.graphData = this.convertToGraphFormat(response);
-    this.summary = this.generateSummary(response);
   }
 
   private convertToGraphFormat(nodes: TreeNode[]) {
@@ -103,10 +137,5 @@ export class TreeProcessingComponent implements OnInit {
       }));
 
     return { nodes: graphNodes, links: graphLinks };
-  }
-
-  private generateSummary(nodes: TreeNode[]): string {
-    const rootNode = nodes.find(node => !node.parent_id);
-    return rootNode?.summary || 'Processing research data...';
   }
 } 

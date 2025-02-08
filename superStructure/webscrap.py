@@ -16,7 +16,7 @@ load_dotenv()
 
 serp_api_key = os.getenv("SERP_API_KEY")
 
-MAX_SCRAPE_CHARS = 20000
+MAX_SCRAPE_CHARS = 10000
 MAX_RETRIES = 1          # Maximum number of retries per page.
 RETRY_DELAY = 0.1          # Seconds to wait between retries.
 
@@ -80,13 +80,13 @@ def scrape_web_content(links, max_chars=MAX_SCRAPE_CHARS):
     Limits the scraped text to max_chars per webpage.
     """
     content_dict = {}
-    for link in links[:3]:  # Limit to the first 5 links.
+    for link in links[:2]:  # Limit to the first 5 links.
         success = False
         attempts = 0
         while attempts < MAX_RETRIES and not success:
             try:
                 logging.info(f"Scraping {link} (Attempt {attempts + 1}/{MAX_RETRIES})...")
-                response = requests.get(link, timeout=1)
+                response = requests.get(link, timeout=.5)
                 if response.status_code == 200:
                     soup = BeautifulSoup(response.content, 'html.parser')
                     page_title = soup.title.string.strip() if soup.title and soup.title.string else link

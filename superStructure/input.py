@@ -96,11 +96,15 @@ def summarize_page(title: str, link: str, content: str, client: boto3.client, uu
 def create_critical_investigation_questions(scraped_sources: List[str], investigation_question: str, uuid) -> List[str]:
     """
     Generates critical follow-up investigation questions based on scraped sources.
+    This function will generate at most NUM_QUESTIONS questions.
     
     :param scraped_sources: List of texts scraped from various sources.
     :param investigation_question: The overall investigation question.
     :return: A list of critical follow-up questions.
     """
+    # Hyperparameter: maximum number of questions to generate.
+    NUM_QUESTIONS = 2
+
     def get_critical_question_tool_spec() -> Dict[str, Any]:
         return {
             "toolSpec": {
@@ -139,7 +143,7 @@ def create_critical_investigation_questions(scraped_sources: List[str], investig
         "follow-up questions that probe for serious issues, red flags, or gaps in the information. "
         "Do NOT output the questions as one block of text. Instead, for each question, call the 'CriticalQuestion_Tool' "
         "by issuing a tool call. Each tool call must have an input JSON with a field 'question' containing one "
-        "critical investigation question.  Always mention the company name explicitly in the question."
+        "critical investigation question. Always mention the company name explicitly in the question."
     )
     system_prompt = [{"text": system_prompt_text}]
     user_message_text = (
@@ -150,14 +154,14 @@ def create_critical_investigation_questions(scraped_sources: List[str], investig
     tool_config = {"tools": [get_critical_question_tool_spec()]}
     client = boto3.client("bedrock-runtime", region_name=AWS_REGION)
     collected_questions: List[str] = []
+    # You may choose to adjust the number of recursions.
     MAX_RECURSIONS = 1
 
     def process_model_response(conversation: List[Dict[str, Any]], recursion: int):
-
-        model_ids = ["us.anthropic.claude-3-5-haiku-20241022-v1:0"], 
-        model_id = ""
+        # Use one of the model IDs.
+        model_ids = ["us.anthropic.claude-3-5-haiku-20241022-v1:0"],
         model_id = random.choice(model_ids[0])
-        #model_id = "us.meta.llama3-3-70b-instruct-v1:0"
+        
         if recursion <= 0:
             logging.warning("Max recursion reached; stopping further requests.")
             return
@@ -181,10 +185,8 @@ def create_critical_investigation_questions(scraped_sources: List[str], investig
         has_tool = any("toolUse" in block for block in content)
         has_text = any("text" in block for block in content)
         if has_tool and has_text:
-            # Keep only tool-use blocks (or alternatively split into two messages)
+            # Keep only tool-use blocks.
             assistant_message["content"] = [block for block in content if "toolUse" in block]
-        # *** END NEW CODE ***
-
 
         conversation.append(assistant_message)
 
@@ -194,9 +196,12 @@ def create_critical_investigation_questions(scraped_sources: List[str], investig
         if tool_uses:
             tool_result_contents = []
             for tu in tool_uses:
+                # If we've reached the maximum number of questions, break out.
+                if len(collected_questions) >= NUM_QUESTIONS:
+                    break
                 tool_response = invoke_critical_question_tool(tu)
                 question_text = tool_response["content"].get("question", "").strip()
-                if question_text:
+                if question_text and len(collected_questions) < NUM_QUESTIONS:
                     logging.info(f"Collected critical question: {question_text}")
                     collected_questions.append(question_text)
                 tool_result_contents.append({
@@ -206,8 +211,10 @@ def create_critical_investigation_questions(scraped_sources: List[str], investig
                     }
                 })
             conversation.append({"role": "user", "content": tool_result_contents})
-            process_model_response(conversation, recursion - 1)
-        elif stop_reason != "end_turn" and len(collected_questions) < MAX_RECURSIONS:
+            # Only recurse if we haven't yet collected the desired number of questions.
+            if len(collected_questions) < NUM_QUESTIONS:
+                process_model_response(conversation, recursion - 1)
+        elif stop_reason != "end_turn" and len(collected_questions) < NUM_QUESTIONS:
             conversation.append({
                 "role": "user",
                 "content": [{"text": "Please provide additional critical investigation questions using tool calls."}]
@@ -220,7 +227,7 @@ def create_critical_investigation_questions(scraped_sources: List[str], investig
     return collected_questions
 
 
-def create_questions_list(company_name: str, uuid, target_question_count: int = 2, max_recursions: int = 3) -> List[str]:
+def create_questions_list(company_name: str, uuid, target_question_count: int = 3, max_recursions: int = 3) -> List[str]:
     """
     Generates due diligence questions for a company by having the model call a tool for each question.
 
@@ -356,7 +363,7 @@ def ask_question(input_query: str, company_name: str, uuid, depth) -> str:
     #combined_summary = "\n\n".join(summaries)
     combined_summary = str(webscrap_result.items())
 
-    if depth < 1:
+    if depth < 2:
         additional_questions = create_critical_investigation_questions(summaries, input_query, uuid)
         results_2 = process_questions(additional_questions, company_name, uuid, depth + 1)
     else:

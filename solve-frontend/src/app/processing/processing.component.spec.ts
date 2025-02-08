@@ -19,5 +19,5 @@ describe('ProcessingComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
-  });
+  }); 
 });

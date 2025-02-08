@@ -1,12 +1,11 @@
+interface SubQuestion {
+  question: string;
+  result: string;
+  depth: number;
+  other_questions: string[];
+}
+
 export interface TreeNode {
-  id: string;
-  parent_id?: string;
-  title: string;
-  content: string;
-  summary?: string;
-  complete?: boolean;
-  metrics?: {
-    authority: number;
-    relevance: number;
-  };
+  full_report: string;
+  subquestions: SubQuestion[];
 } 

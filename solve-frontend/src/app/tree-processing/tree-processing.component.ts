@@ -98,7 +98,7 @@ export class TreeProcessingComponent implements OnInit, OnDestroy {
       this.http.get<TreeNode[]>(`https://18.191.231.140/read_json?session_id=${this.sessionId}`)
         .subscribe({
           next: (response) => {
-            this.updateGraphData(response);
+            this.updateGraphData(response[0]);
             if (this.researchTree.some(node => node.complete)) {
               this.processingComplete = true;
               clearInterval(interval);
@@ -114,27 +114,58 @@ export class TreeProcessingComponent implements OnInit, OnDestroy {
     }, 1000); // Poll every second
   }
 
-  private updateGraphData(response: TreeNode[]) {
-    this.researchTree = response;
-    this.summaryService.updateSummaries(response);  // Update summaries
+  private updateGraphData(response: TreeNode) {
+    this.researchTree = [response]; // Wrap in array for compatibility
+    this.summaryService.updateSummaries(this.researchTree);  // Update summaries
     this.graphData = this.convertToGraphFormat(response);
   }
 
-  private convertToGraphFormat(nodes: TreeNode[]) {
-    // Convert TreeNode[] to format needed by ngx-graph
-    const graphNodes = nodes.map(node => ({
-      id: node.id,
-      label: node.title || 'Node',
-      data: node
-    }));
+  private convertToGraphFormat(data: TreeNode) {
+    const graphNodes = [];
+    const graphLinks = [];
+    
+    // Add root node for full report
+    graphNodes.push({
+      id: 'root',
+      label: 'Full Report',
+      data: { content: data.full_report }
+    });
 
-    const graphLinks = nodes
-      .filter(node => node.parent_id)
-      .map(node => ({
-        id: `${node.parent_id}-${node.id}`,
-        source: node.parent_id,
-        target: node.id
-      }));
+    // Add nodes for each subquestion
+    data.subquestions.forEach((subq, index) => {
+      const nodeId = `subq-${index}`;
+      graphNodes.push({
+        id: nodeId,
+        label: subq.question,
+        data: {
+          content: subq.result,
+          depth: subq.depth
+        }
+      });
+
+      // Link to root node
+      graphLinks.push({
+        id: `link-${nodeId}`,
+        source: 'root',
+        target: nodeId
+      });
+
+      // Add nodes for other questions
+      subq.other_questions.forEach((otherQ, otherIndex) => {
+        const childId = `${nodeId}-child-${otherIndex}`;
+        graphNodes.push({
+          id: childId,
+          label: otherQ,
+          data: { depth: subq.depth + 1 }
+        });
+
+        graphLinks.push({
+          id: `link-${childId}`,
+          source: nodeId,
+          target: childId
+        });
+      });
+    });
 
     return { nodes: graphNodes, links: graphLinks };
   }

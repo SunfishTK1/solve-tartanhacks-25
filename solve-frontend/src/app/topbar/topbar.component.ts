@@ -16,3 +16,4 @@ export class TopbarComponent {
     this.router.navigate(['/chat']);
   }
 }
+  

@@ -72,6 +72,20 @@ def get_summary():
         return jsonify({"content": summary.get('content', 'No summary available')})
     return jsonify({"content": "Generating research summary..."})
 
+@app.route("/create_session", methods=["POST"])
+def create_session():
+    """Create a new session with a unique ID."""
+    session_id = str(uuid.uuid4())
+    print(f"Created new session with ID: {session_id}")
+    
+    file_path = os.path.join(DATA_DIR, f"{session_id}.txt")
+    
+    # Initialize empty file for the session
+    with open(file_path, "w") as f:
+        f.write("")
+    
+    return jsonify({"session_id": session_id}), 200
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
 

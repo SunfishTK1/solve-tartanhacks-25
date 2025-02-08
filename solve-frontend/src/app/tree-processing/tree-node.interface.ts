@@ -1,4 +1,4 @@
-interface SubQuestion {
+export interface SubQuestion {
   question: string;
   result: string;
   depth: number;

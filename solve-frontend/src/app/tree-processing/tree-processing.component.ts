@@ -9,6 +9,29 @@ import { NgxGraphModule } from '@swimlane/ngx-graph';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { SummaryService } from '../services/summary.service';
+import { curveNatural } from 'd3-shape';
+
+interface GraphNode {
+  id: string;
+  label: string;
+  data: any;
+}
+
+interface GraphLink {
+  id: string;
+  source: string;
+  target: string;
+}
+
+// Update the interface to match ngx-graph's event type
+interface NodeClickEvent {
+  id: string;
+  label: string;
+  data: {
+    content: string;
+    depth?: number;
+  };
+}
 
 @Component({
   selector: 'app-tree-processing',
@@ -26,11 +49,16 @@ import { SummaryService } from '../services/summary.service';
 
 export class TreeProcessingComponent implements OnInit, OnDestroy {
   sessionId: string = '';
-  researchTree: TreeNode[] = [];
+  researchTree: TreeNode[] = [{ 
+    full_report: '',
+    subquestions: []
+  }];
   processingComplete = false;
   graphData: any = { nodes: [], links: [] };
   currentSummary: string = 'Initializing research...';
   private summaryInterval: any;
+  selectedNode: any = null;
+  curve = curveNatural;
 
   constructor(
     private router: Router, 
@@ -67,7 +95,7 @@ export class TreeProcessingComponent implements OnInit, OnDestroy {
   }
 
   private fetchSummary() {
-    this.http.get<{content: string}>(`https://18.191.231.140/get_summary?session_id=${this.sessionId}`)
+    this.summaryService.fetchSummary(this.sessionId)
       .subscribe({
         next: (response) => {
           if (response && response.content) {
@@ -98,13 +126,16 @@ export class TreeProcessingComponent implements OnInit, OnDestroy {
       this.http.get<TreeNode[]>(`https://18.191.231.140/read_json?session_id=${this.sessionId}`)
         .subscribe({
           next: (response) => {
-            this.updateGraphData(response[0]);
-            if (this.researchTree.some(node => node.complete)) {
-              this.processingComplete = true;
-              clearInterval(interval);
-              setTimeout(() => {
-                this.router.navigate(['/output']);
-              }, 2000);
+            console.log('Received tree data:', response);
+            if (response && response[0]) {
+              this.updateGraphData(response[0]);
+              if (response[0].full_report && response[0].subquestions.length === 0) {
+                this.processingComplete = true;
+                clearInterval(interval);
+                setTimeout(() => {
+                  this.router.navigate(['/output']);
+                }, 2000);
+              }
             }
           },
           error: (error) => {
@@ -115,58 +146,65 @@ export class TreeProcessingComponent implements OnInit, OnDestroy {
   }
 
   private updateGraphData(response: TreeNode) {
-    this.researchTree = [response]; // Wrap in array for compatibility
-    this.summaryService.updateSummaries(this.researchTree);  // Update summaries
+    this.researchTree = [response]; // Updated here when data is received
     this.graphData = this.convertToGraphFormat(response);
   }
 
   private convertToGraphFormat(data: TreeNode) {
-    const graphNodes = [];
-    const graphLinks = [];
+    console.log('Converting to graph format:', data);
+    const graphNodes: GraphNode[] = [];
+    const graphLinks: GraphLink[] = [];
     
-    // Add root node for full report
+    if (!data) return { nodes: [], links: [] };
+
     graphNodes.push({
       id: 'root',
       label: 'Full Report',
       data: { content: data.full_report }
     });
 
-    // Add nodes for each subquestion
-    data.subquestions.forEach((subq, index) => {
-      const nodeId = `subq-${index}`;
-      graphNodes.push({
-        id: nodeId,
-        label: subq.question,
-        data: {
-          content: subq.result,
-          depth: subq.depth
-        }
-      });
-
-      // Link to root node
-      graphLinks.push({
-        id: `link-${nodeId}`,
-        source: 'root',
-        target: nodeId
-      });
-
-      // Add nodes for other questions
-      subq.other_questions.forEach((otherQ, otherIndex) => {
-        const childId = `${nodeId}-child-${otherIndex}`;
+    if (data.subquestions) {
+      data.subquestions.forEach((subq, index) => {
+        const nodeId = `subq-${index}`;
         graphNodes.push({
-          id: childId,
-          label: otherQ,
-          data: { depth: subq.depth + 1 }
+          id: nodeId,
+          label: subq.question,
+          data: {
+            content: subq.result,
+            depth: subq.depth
+          }
         });
 
+        // Link to root node
         graphLinks.push({
-          id: `link-${childId}`,
-          source: nodeId,
-          target: childId
+          id: `link-${nodeId}`,
+          source: 'root',
+          target: nodeId
+        });
+
+        // Add nodes for other questions
+        (subq.other_questions || []).forEach((otherQ, otherIndex) => {
+          const childId = `${nodeId}-child-${otherIndex}`;
+          graphNodes.push({
+            id: childId,
+            label: otherQ,
+            data: { depth: subq.depth + 1 }
+          });
+
+          graphLinks.push({
+            id: `link-${childId}`,
+            source: nodeId,
+            target: childId
+          });
         });
       });
-    });
+    }
 
     return { nodes: graphNodes, links: graphLinks };
+  }
+
+  // Update the handler to use the correct type
+  onNodeClick(event: NodeClickEvent) {
+    this.selectedNode = event;
   }
 } 

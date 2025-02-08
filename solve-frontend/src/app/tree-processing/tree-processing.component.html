@@ -1,31 +1,20 @@
 <!DOCTYPE html>
 <div class="processing-container">
-  <h1>Tree Structure</h1>
+  <h1>Research Progress</h1>
   <div class="tree-container" *ngIf="!processingComplete">
     <ul class="research-tree">
-      <ng-container *ngFor="let node of researchTree">
-        <li class="tree-node">
-          <span class="node-topic">{{ node.title }}</span>
-          <ul class="subtopics" *ngIf="node.children?.length > 0">
-            <ng-container *ngFor="let sub of node.children">
-              <li class="subtopic-node">
-                <span class="subtopic">{{ sub.topic }}</span>
-                <ul class="sub-subtopics" *ngIf="sub.subtopics.length > 0">
-                  <li *ngFor="let subsub of sub.subtopics">
-                    <span class="sub-subtopic">{{ subsub.topic }}</span>
-                  </li>
-                </ul>
-              </li>
-            </ng-container>
-          </ul>
-        </li>
-      </ng-container>
+      <li class="tree-node">
+        <span class="node-topic">Full Report</span>
+        <ul class="subtopics" *ngIf="researchTree[0]?.subquestions?.length">
+          <li *ngFor="let subq of researchTree[0]?.subquestions" class="subtopic-node">
+            <span class="subtopic">{{ subq.question }}</span>
+          </li>
+        </ul>
+      </li>
     </ul>
   </div>
   <h2 *ngIf="processingComplete" class="completion-text">Analysis complete</h2>
 </div>
-
-<app-topbar></app-topbar>
 
 <div class="main-container">
   <div class="summary-section">
@@ -40,14 +29,12 @@
         [nodes]="graphData.nodes"
         [autoCenter]="true"
         [autoZoom]="true"
-        [curve]="curve"
-        (nodeClick)="selectedNode = $event.data">
+        [curve]="curve">
       </ngx-graph>
     </div>
 
     <div class="sidebar">
       <mat-accordion>
-        <!-- Full Report Panel -->
         <mat-expansion-panel>
           <mat-expansion-panel-header>
             <mat-panel-title>Full Report</mat-panel-title>
@@ -55,16 +42,15 @@
           <p>{{ researchTree[0]?.full_report }}</p>
         </mat-expansion-panel>
 
-        <!-- Subquestions Panels -->
         <mat-expansion-panel *ngFor="let subq of researchTree[0]?.subquestions">
           <mat-expansion-panel-header>
-            <mat-panel-title>{{ subq.question }}</mat-panel-title>
+            <mat-panel-title>{{ subq?.question }}</mat-panel-title>
           </mat-expansion-panel-header>
-          <p>{{ subq.result }}</p>
+          <p>{{ subq?.result }}</p>
           <div class="metrics">
-            <p>Depth: {{ subq.depth }}</p>
+            <p>Depth: {{ subq?.depth }}</p>
           </div>
-          <div *ngIf="subq.other_questions.length > 0">
+          <div *ngIf="subq?.other_questions?.length">
             <h4>Related Questions:</h4>
             <ul>
               <li *ngFor="let otherQ of subq.other_questions">{{ otherQ }}</li>

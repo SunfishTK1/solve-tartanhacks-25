@@ -28,6 +28,7 @@ export class SessionService {
     return this.http.post<{session_id: string}>('https://18.191.231.140/create_session', {})
       .pipe(
         tap(response => {
+          console.log('Received session ID:', response.session_id);
           this.currentSessionId = response.session_id;
           localStorage.setItem('research_session_id', response.session_id);
         })

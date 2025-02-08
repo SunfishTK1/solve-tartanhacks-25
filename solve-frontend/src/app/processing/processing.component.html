@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<app-topbar></app-topbar>
+<div class="processing-container">
+  <h1>Researching and Creating Your Report...</h1>
+  <div class="tree-container" *ngIf="!processingComplete">
+    <ul>
+      <ng-container *ngFor="let node of researchTree">
+        <li>
+          <span>{{ node.topic }}</span>
+          <ul>
+            <ng-container *ngFor="let sub of node.subtopics">
+              <li>{{ sub.topic }}</li>
+            </ng-container>
+          </ul>
+        </li>
+      </ng-container>
+    </ul>
+  </div>
+  <h2 *ngIf="processingComplete" class="completion-text">Analysis complete</h2>
+</div>

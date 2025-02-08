@@ -363,14 +363,17 @@ def process_questions(questions_list: List[str], company_name: str) -> None:
             executor.submit(ask_question, question, company_name): question
             for question in questions_list
         }
+        return_me_result = []
         for future in as_completed(future_to_question):
             question = future_to_question[future]
             try:
                 result = future.result()
-                print(f"\nResults for question: '{question}'")
-                print(result)
+                #print(f"\nResults for question: '{question}'")
+                #print(result)
+                return_me_result.append([question, result])
             except Exception as e:
                 print(f"Exception for question '{question}': {str(e)}")
+        return return_me_result
 
 
 def enter_company_name(company_name: str) -> None:
@@ -381,8 +384,8 @@ def enter_company_name(company_name: str) -> None:
     """
     # You may use a hard-coded list or dynamically generate one:
     questions_list = create_questions_list(company_name)
-    process_questions(questions_list, company_name)
+    return process_questions(questions_list, company_name)
 
 
 # Example usage:
-enter_company_name("Perplexity")
+print(enter_company_name("Perplexity"))

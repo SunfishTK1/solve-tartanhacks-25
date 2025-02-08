@@ -5,11 +5,10 @@ import { TopbarComponent } from '../topbar/topbar.component';
 import { HttpClient } from '@angular/common/http';
 
 @Component({
-  selector: 'app-processing',
-  standalone: true,
-  imports: [CommonModule, TopbarComponent],
-  templateUrl: './processing.component.html',
-  styleUrls: ['./processing.component.css']
+    selector: 'app-processing',
+    imports: [CommonModule, TopbarComponent],
+    templateUrl: './processing.component.html',
+    styleUrls: ['./processing.component.css']
 })
 export class ProcessingComponent implements OnInit {
   researchUpdates: string = '';

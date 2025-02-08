@@ -108,47 +108,47 @@ def analyze_company():
     """
     [POST] /analyze
     ---------------
-    Performs a due diligence analysis for the provided company by invoking the backend logic.
+    Performs a due diligence analysis for the provided company.
+    Accepts company_name, industry, and an optional uuid.
     
     **Request JSON:**
     {
         "company_name": "Example Company, Inc.",
+        "industry": "Retail",
         "uuid": "optional-unique-identifier"  // Optional; if not provided a new one will be generated.
     }
     
     **Processing Details:**
-      - Calls the backend function `enter_company_name()` which:
-          1. Generates due diligence questions.
-          2. Processes each question concurrently.
-          3. Summarizes web-scraped results.
-          4. Generates a comprehensive full report.
+      - Calls the backend function `enter_company_name()` (or a similar function)
+        to perform the due diligence analysis.
+      - If an industry is provided, it is attached to the response.
     
     **Sample Response:**
     {
         "full report": "Full due diligence report text...",
-        "subquestions": [
-            {
-                "question": "Due diligence question text...",
-                "result": "Answer text...",
-                "depth": 1,
-                "other_questions": [ ... ]
-            },
-            ...
-        ]
+        "subquestions": [ ... ],
+        "industry": "Retail"  // Echoed back if provided
     }
     """
     data = request.json
     company_name = data.get("company_name")
+    industry = data.get("industry")  # New field for industry information.
     uuid_value = data.get("uuid", str(uuid.uuid4()))
+    
     if not company_name:
         return jsonify({"error": "Missing 'company_name' in request"}), 400
 
     try:
-        # Call the backend function that performs the full due diligence analysis.
-        result = enter_company_name(company_name, uuid_value)
+        # Call the existing backend analysis function.
+        # If desired, you could create a separate function that also uses industry.
+        result = enter_company_name(company_name, uuid_value, industry)
+        
+        # If industry is provided, attach it to the result.
+        if industry:
+            result["industry"] = industry
+
         return jsonify(result), 200
     except Exception as e:
-        # Log the error and return a 500 error response
         app.logger.error(f"Error in /analyze: {e}")
         return jsonify({"error": str(e)}), 500
 

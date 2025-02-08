@@ -220,11 +220,14 @@ def create_critical_investigation_questions(scraped_sources: List[str], investig
     return collected_questions
 
 
-def create_questions_list(company_name: str, uuid) -> List[str]:
+def create_questions_list(company_name: str, uuid, target_question_count: int = 2, max_recursions: int = 3) -> List[str]:
     """
     Generates due diligence questions for a company by having the model call a tool for each question.
-    
+
     :param company_name: Name of the company.
+    :param uuid: A unique identifier (for logging or tracking purposes).
+    :param target_question_count: The desired number of due diligence questions to generate.
+    :param max_recursions: The maximum number of recursive attempts.
     :return: A list of due diligence questions.
     """
     def get_question_tool_spec() -> Dict[str, Any]:
@@ -261,8 +264,8 @@ def create_questions_list(company_name: str, uuid) -> List[str]:
         "Instead, for each question, call the 'Question_Tool' by issuing a tool call. "
         "Each tool call must have an input JSON with a field 'question' containing one due diligence question. "
         "Ensure that the questions cover areas such as financial performance, market position, management, "
-        "operational risks, regulatory compliance, competitive landscape, growth strategy, and potential red flags."
-        " Always mention the company name explicitly in the question."
+        "operational risks, regulatory compliance, competitive landscape, growth strategy, and potential red flags. "
+        "Always mention the company name explicitly in the question."
     )
     system_prompt = [{"text": system_prompt_text}]
     user_message_text = f"Generate separate due diligence questions for '{company_name}' using tool calls."
@@ -270,10 +273,8 @@ def create_questions_list(company_name: str, uuid) -> List[str]:
     tool_config = {"tools": [get_question_tool_spec()]}
     client = boto3.client("bedrock-runtime", region_name=AWS_REGION)
     collected_questions: List[str] = []
-    MAX_RECURSIONS = 5
 
     def process_model_response(conversation: List[Dict[str, Any]], recursion: int):
-        model_id = "us.anthropic.claude-3-5-haiku-20241022-v1:0"
         if recursion <= 0:
             logging.warning("Max recursion reached; stopping further requests.")
             return
@@ -281,7 +282,7 @@ def create_questions_list(company_name: str, uuid) -> List[str]:
         try:
             response = invoke_converse_with_retries(
                 client,
-                modelId=model_id,
+                modelId="us.anthropic.claude-3-5-haiku-20241022-v1:0",
                 messages=conversation,
                 system=system_prompt,
                 toolConfig=tool_config
@@ -312,8 +313,10 @@ def create_questions_list(company_name: str, uuid) -> List[str]:
                     }
                 })
             conversation.append({"role": "user", "content": tool_result_contents})
-            process_model_response(conversation, recursion - 1)
-        elif stop_reason != "end_turn" and len(collected_questions) < MAX_RECURSIONS:
+            # Continue recursion if we haven't yet reached the desired number of questions.
+            if len(collected_questions) < target_question_count:
+                process_model_response(conversation, recursion - 1)
+        elif stop_reason != "end_turn" and len(collected_questions) < target_question_count:
             conversation.append({
                 "role": "user",
                 "content": [{"text": "Please provide additional due diligence questions using tool calls."}]
@@ -322,8 +325,9 @@ def create_questions_list(company_name: str, uuid) -> List[str]:
         else:
             return
 
-    process_model_response(conversation, MAX_RECURSIONS)
-    return collected_questions
+    process_model_response(conversation, max_recursions)
+    # Return only as many questions as requested.
+    return collected_questions[:target_question_count]
 
 
 def ask_question(input_query: str, company_name: str, uuid, depth) -> str:
@@ -352,7 +356,7 @@ def ask_question(input_query: str, company_name: str, uuid, depth) -> str:
     #combined_summary = "\n\n".join(summaries)
     combined_summary = str(webscrap_result.items())
 
-    if depth < 2:
+    if depth < 1:
         additional_questions = create_critical_investigation_questions(summaries, input_query, uuid)
         results_2 = process_questions(additional_questions, company_name, uuid, depth + 1)
     else:
@@ -456,7 +460,7 @@ def generate_full_report(save_questions: List[Dict[str, Any]], company_name: str
         logging.error(f"Error generating full report: {e}")
         return "Error generating full report."
 
-def enter_company_name(company_name: str, uuid="NONE") -> None:
+def enter_company_name(company_name: str, uuid="NONE", industry="NONE") -> None:
     """
     For a given company name, generates a list of due diligence questions and processes them.
     
@@ -469,4 +473,4 @@ def enter_company_name(company_name: str, uuid="NONE") -> None:
     return {"full report": full_report, "subquestions": save_questions}
 
 # Example usage:
-print(enter_company_name("Millies Coffee and Creamery of Pittsburgh, PA", "1234"))
+#print(enter_company_name("Millies Coffee and Creamery of Pittsburgh, PA", "1234"))

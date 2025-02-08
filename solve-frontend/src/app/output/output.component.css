@@ -1,0 +1,51 @@
+.output-container {
+    font-family: 'Inter', sans-serif;
+    padding: 40px;
+    background-color: white;
+    color: #333;
+    max-width: 80%;
+    margin: auto;
+  }
+  
+  .title {
+    font-family: 'Raleway', sans-serif;
+    text-align: left;
+    font-size: 36px;
+    color: #082c54;
+    font-weight: bold;
+  }
+  
+  .main-heading {
+    font-size: 24px;
+    font-family: 'Raleway', sans-serif;
+    color: #082c54;
+    font-weight: bold;
+    margin-top: 20px;
+  }
+  
+  .subquestion-button {
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    color: #333;
+    background-color: #f0f0f0;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-top: 5px;
+    display: block;
+    width: fit-content;
+  }
+  
+  .subquestion-button:hover {
+    background-color: #e0e0e0;
+  }
+  
+  .subquestion-button.smaller-text {
+    font-size: 16px;
+  }
+  
+  .expanded-content {
+    padding-left: 20px;
+    margin-top: 10px;
+  }

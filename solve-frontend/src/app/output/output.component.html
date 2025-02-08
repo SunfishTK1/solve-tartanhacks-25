@@ -1,12 +1,34 @@
 <!DOCTYPE html>
 <app-topbar></app-topbar>
-
 <div class="output-container">
-  <h1>Your Generated Business Report</h1>
-  <p>Here is the final AI-generated business report based on your inputs.</p>
-
-  <!-- Placeholder for report content -->
-  <div class="report-content">
-    <p>Loading report...</p>
+  <h1 class="title">Analysis</h1>
+  <p>{{ reportData.full_report }}</p>
+  
+  <div class="section" *ngFor="let section of reportData.subquestions">
+    <h2 class="main-heading">{{ section.question }}</h2>
+    <p>{{ section.result }}</p>
+    
+    <div *ngIf="section.other_questions && section.other_questions.length > 0">
+      <div class="subquestions">
+        <ng-container *ngFor="let subquestion of section.other_questions">
+          <button class="subquestion-button" (click)="toggleSection(subquestion.question)">
+            {{ subquestion.question }}
+          </button>
+          <div *ngIf="expandedSections.has(subquestion.question)" class="expanded-content">
+            <p>{{ subquestion.result }}</p>
+            <div *ngIf="subquestion.other_questions && subquestion.other_questions.length > 0">
+              <ng-container *ngFor="let subsub of subquestion.other_questions">
+                <button class="subquestion-button smaller-text" (click)="toggleSection(subsub.question)">
+                  {{ subsub.question }}
+                </button>
+                <div *ngIf="expandedSections.has(subsub.question)" class="expanded-content">
+                  <p>{{ subsub.result }}</p>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
   </div>
 </div>

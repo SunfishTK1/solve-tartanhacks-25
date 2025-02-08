@@ -51,7 +51,7 @@ def invoke_converse_with_retries(client: boto3.client, **kwargs) -> Dict[str, An
     raise Exception("Max retries exceeded for converse call.")
 
 
-def summarize_page(title: str, link: str, content: str, client: boto3.client) -> str:
+def summarize_page(title: str, link: str, content: str, client: boto3.client, uuid) -> str:
     """
     Summarizes a page's content by invoking the Converse API.
     
@@ -201,7 +201,7 @@ def create_critical_investigation_questions(scraped_sources: List[str], investig
     return collected_questions
 
 
-def create_questions_list(company_name: str) -> List[str]:
+def create_questions_list(company_name: str, uuid) -> List[str]:
     """
     Generates due diligence questions for a company by having the model call a tool for each question.
     
@@ -306,7 +306,7 @@ def create_questions_list(company_name: str) -> List[str]:
     return collected_questions
 
 
-def ask_question(input_query: str, company_name: str) -> str:
+def ask_question(input_query: str, company_name: str, uuid) -> str:
     """
     Given an input query and company name, this function scrapes relevant pages,
     summarizes them, and uses the consolidated summaries as context to answer the question.
@@ -325,9 +325,11 @@ def ask_question(input_query: str, company_name: str) -> str:
     
     summaries = []
     for title, (link, content) in webscrap_result.items():
-        summary = summarize_page(title, link, content, client)
+        summary = summarize_page(title, link, content, client, uuid)
         summaries.append(f"Title: {title}\nLink: {link}\nSummary: {summary}")
     combined_summary = "\n\n".join(summaries)
+
+    additional_data = create_critical_investigation_questions(summaries, input_query)
     
     user_message = (
         f"Answer the question: {input_query} about the company, {company_name}. "
@@ -351,7 +353,7 @@ def ask_question(input_query: str, company_name: str) -> str:
         exit(1)
 
 
-def process_questions(questions_list: List[str], company_name: str) -> None:
+def process_questions(questions_list: List[str], company_name: str, uuid) -> None:
     """
     Processes multiple questions concurrently using a thread pool.
     
@@ -360,7 +362,7 @@ def process_questions(questions_list: List[str], company_name: str) -> None:
     """
     with ThreadPoolExecutor(max_workers=4) as executor:
         future_to_question = {
-            executor.submit(ask_question, question, company_name): question
+            executor.submit(ask_question, question, company_name, uuid): question
             for question in questions_list
         }
         return_me_result = []
@@ -376,15 +378,15 @@ def process_questions(questions_list: List[str], company_name: str) -> None:
         return return_me_result
 
 
-def enter_company_name(company_name: str) -> None:
+def enter_company_name(company_name: str, uuid="NONE") -> None:
     """
     For a given company name, generates a list of due diligence questions and processes them.
     
     :param company_name: The name of the company.
     """
     # You may use a hard-coded list or dynamically generate one:
-    questions_list = create_questions_list(company_name)
-    return process_questions(questions_list, company_name)
+    questions_list = create_questions_list(company_name, uuid)
+    return process_questions(questions_list, company_name, uuid)
 
 
 # Example usage:

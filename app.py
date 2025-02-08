@@ -9,18 +9,6 @@ app = Flask(__name__)
 DATA_DIR = "data"
 os.makedirs(DATA_DIR, exist_ok=True)
 
-@app.route("/start", methods=["GET"])
-def start_session():
-    """Generate a unique session ID and create a text file."""
-    session_id = str(uuid.uuid4())[:8]  # Shorter session ID
-    file_path = os.path.join(DATA_DIR, f"{session_id}.txt")
-
-    # Create an empty file
-    with open(file_path, "w") as f:
-        f.write("")
-
-    return jsonify({"session_id": session_id, "message": "Session started"}), 200
-
 @app.route("/write", methods=["POST"])
 def write_text():
     """Write text to the user’s file."""
@@ -31,9 +19,10 @@ def write_text():
     file_path = os.path.join(DATA_DIR, f"{session_id}.txt")
 
     if not os.path.exists(file_path):
-        return jsonify({"error": "Invalid session ID"}), 400
+        with open(file_path, "w") as f:
+            f.write("")
 
-    with open(file_path, "a") as f:
+    with open(file_path, "w") as f:
         f.write(text + "\n")
 
     return jsonify({"message": "Text added"}), 200
@@ -45,7 +34,8 @@ def read_text():
     file_path = os.path.join(DATA_DIR, f"{session_id}.txt")
 
     if not os.path.exists(file_path):
-        return jsonify({"error": "Invalid session ID"}), 400
+        with open(file_path, "w") as f:
+            f.write("") 
 
     with open(file_path, "r") as f:
         content = f.read()

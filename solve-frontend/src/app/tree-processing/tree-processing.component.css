@@ -1,0 +1,103 @@
+.processing-container {
+  padding: 1rem;
+  width: 45%;
+  float: right;
+  margin: 0 1%;
+  min-height: calc(100vh - 100px);
+}
+
+.tree-container {
+  margin-top: 1rem;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+h1 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.research-tree {
+  list-style: none;
+  padding-left: 0;
+}
+
+.tree-node {
+  margin: 0.75rem 0;
+}
+
+.node-topic {
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.subtopics {
+  list-style: none;
+  padding-left: 1.5rem;
+  margin-top: 0.25rem;
+}
+
+.subtopic-node {
+  margin: 0.4rem 0;
+  position: relative;
+}
+
+.subtopic {
+  color: #34495e;
+}
+
+.sub-subtopics {
+  list-style: none;
+  padding-left: 1.5rem;
+  margin-top: 0.25rem;
+}
+
+.sub-subtopic {
+  color: #7f8c8d;
+}
+
+/* Add connecting lines */
+.subtopic-node::before {
+  content: '';
+  position: absolute;
+  left: -1rem;
+  top: 0.7rem;
+  width: 0.75rem;
+  height: 1px;
+  background: #bdc3c7;
+}
+
+.subtopic-node::after {
+  content: '';
+  position: absolute;
+  left: -1rem;
+  top: 0;
+  width: 1px;
+  height: 100%;
+  background: #bdc3c7;
+}
+
+.completion-text {
+  text-align: center;
+  color: #27ae60;
+  margin-top: 1rem;
+}
+
+/* Add scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+} 

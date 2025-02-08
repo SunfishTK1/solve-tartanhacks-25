@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<div class="processing-container">
+  <h1>Tree Structure</h1>
+  <div class="tree-container" *ngIf="!processingComplete">
+    <ul class="research-tree">
+      <ng-container *ngFor="let node of researchTree">
+        <li class="tree-node">
+          <span class="node-topic">{{ node.topic }}</span>
+          <ul class="subtopics" *ngIf="node.subtopics.length > 0">
+            <ng-container *ngFor="let sub of node.subtopics">
+              <li class="subtopic-node">
+                <span class="subtopic">{{ sub.topic }}</span>
+                <ul class="sub-subtopics" *ngIf="sub.subtopics.length > 0">
+                  <li *ngFor="let subsub of sub.subtopics">
+                    <span class="sub-subtopic">{{ subsub.topic }}</span>
+                  </li>
+                </ul>
+              </li>
+            </ng-container>
+          </ul>
+        </li>
+      </ng-container>
+    </ul>
+  </div>
+  <h2 *ngIf="processingComplete" class="completion-text">Analysis complete</h2>
+</div> 
